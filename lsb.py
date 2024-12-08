@@ -1,7 +1,9 @@
 from PIL import Image
 
+METHODS = ['lsb-text', 'lsb-image', 'alpha']
 
-def insert_lsb_text(filename: str, message: str) -> None:
+
+def encode_text(filename: str, message: str) -> None:
     
     image = Image.open(filename)
     pixels = image.load()
@@ -23,10 +25,13 @@ def insert_lsb_text(filename: str, message: str) -> None:
 
             watermarked_pixels[x, y] = (r, g, b)
 
-    watermarked_image.save(f"{filename}-watermark.png")
+    outfile = filename.split(".")
+    outfile = "".join(outfile[:-1]) + "-watermarked." + outfile[-1]
+    watermarked_image.save(outfile)
+    print(f"Watermarked file: {outfile}")
 
 
-def extract_lsb_text(filename: str) -> None:
+def decode_text(filename: str) -> None:
     
     image = Image.open(filename)
     pixels = image.load()
@@ -48,7 +53,7 @@ def extract_lsb_text(filename: str) -> None:
     print(message)
 
 
-def insert_lsb_image(filename: str, watermark: str) -> None:
+def encode_image(filename: str, watermark: str) -> None:
 
     image = Image.open(filename)
     pixels = image.load()
@@ -70,10 +75,13 @@ def insert_lsb_image(filename: str, watermark: str) -> None:
 
             watermarked_pixels[x, y] = (r, g, b)
 
-    watermarked_image.save(f"{filename}-watermark.png")
+    outfile = filename.split(".")
+    outfile = "".join(outfile[:-1]) + "-watermarked." + outfile[-1]
+    watermarked_image.save(outfile)
+    print(f"Watermarked file: {outfile}")
 
 
-def extract_lsb_image(filename: str) -> None:
+def decode_image(filename: str) -> None:
 
     image = Image.open(filename)
     pixels = image.load()
@@ -92,41 +100,3 @@ def extract_lsb_image(filename: str) -> None:
             watermark_pixels[x, y] = (r, g, b)
 
     watermark.save(f"watermark.png")
-
-
-def insert_alpha_watermark(filename: str, watermark: str) -> None:
-
-    image = Image.open(filename)
-    pixels = image.load()
-
-    watermark_image = Image.open(watermark)
-    watermark_pixels = watermark_image.load()
-
-    watermarked_image = Image.new('RGBA', (image.width, image.height), 'black')
-    watermarked_pixels = watermarked_image.load()
-
-    for x in range(0, image.width):
-        for y in range(0, image.height):
-            r, g, b = pixels[x, y]
-            r2, g2, b2, alpha = watermark_pixels[(x % watermark_image.width), (y % watermark_image.height)]
-            
-            if r2 == g2 == b2 == 0:
-                alpha = 127
-
-            watermarked_pixels[x, y] = (r, g, b, alpha)
-
-    watermarked_image.save(f"{filename}-watermark.png")
-
-
-def remove_alpha_watermark(filename: str) -> None:
-
-    image = Image.open(filename)
-    pixels = image.load()
-
-    for x in range(0, image.width):
-        for y in range(0, image.height):
-            r, g, b, _ = pixels[x, y]
-
-            pixels[x, y] = (r, g, b, 255)
-
-    image.save(f"{filename}-no-watermark.png")
