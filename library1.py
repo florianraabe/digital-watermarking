@@ -1,9 +1,9 @@
 from PIL import Image
 
-METHODS = ['lsb-text', 'lsb-image', 'alpha']
+METHODS = ['lsb', 'lsb-image']
 
 
-def encode_text(filename: str, message: str) -> None:
+def encode_text(filename: str, message: str) -> Image:
     
     image = Image.open(filename)
     pixels = image.load()
@@ -12,6 +12,8 @@ def encode_text(filename: str, message: str) -> None:
     watermarked_pixels = watermarked_image.load()
 
     bits = ''.join(format(ord(i), '08b') for i in message)
+
+    outfile = filename.split(".")
 
     for x in range(0, image.width):
         for y in range(0, image.height):
@@ -25,13 +27,14 @@ def encode_text(filename: str, message: str) -> None:
 
             watermarked_pixels[x, y] = (r, g, b)
 
-    outfile = filename.split(".")
     outfile = "".join(outfile[:-1]) + "-watermarked." + outfile[-1]
     watermarked_image.save(outfile)
     print(f"Watermarked file: {outfile}")
 
+    return watermarked_image
 
-def decode_text(filename: str) -> None:
+
+def decode_text(filename: str) -> str:
     
     image = Image.open(filename)
     pixels = image.load()
@@ -41,7 +44,7 @@ def decode_text(filename: str) -> None:
 
     for x in range(0, image.width):
         for y in range(0, image.height):
-            r, g, b = pixels[x, y]
+            r, g, b, *_ = pixels[x, y]
 
             bits += f'{r:08b}'[7:8]
             # bits += f'{g:08b}'[7:8]
@@ -50,7 +53,7 @@ def decode_text(filename: str) -> None:
     for i in range(0, len(bits), 8):
         message += chr(int(bits[i:i + 8], 2))
 
-    print(message)
+    return message
 
 
 def encode_image(filename: str, watermark: str) -> None:

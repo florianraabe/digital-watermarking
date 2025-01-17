@@ -3,10 +3,9 @@
 import argparse
 from typing import Sequence
 
-import alpha
-import dct
-import lsb
-import tests
+import library1
+import library2
+import library3
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -15,7 +14,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     subparsers = parser.add_subparsers(help='', dest="command")
 
-    choices = alpha.METHODS + lsb.METHODS + dct.METHODS
+    choices = library1.METHODS + library2.METHODS + library3.METHODS
     
     encode_parser = subparsers.add_parser('encode', help='encode watermark')
     encode_parser.add_argument('mode', choices=choices, help='choose mode')
@@ -26,8 +25,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     decode_parser.add_argument('mode', choices=choices, help='choose mode')
     decode_parser.add_argument('filename', help='path to file that contains watermark')
 
-    subparsers.add_parser('test', help='execute the tests')
-    
     args = parser.parse_args(argv)
 
     if args.command == None:
@@ -37,30 +34,31 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "encode":
             print("Encoding watermark...")
             match args.mode:
-                case "lsb-text":
-                    lsb.encode_text(args.filename, args.message)
+                case "lsb":
+                    library1.encode_text(args.filename, args.message)
                 case "lsb-image":
-                    lsb.encode_image(args.filename, args.message)
-                case "alpha":
-                    alpha.encode(args.filename, args.message)
+                    library1.encode_image(args.filename, args.message)
+                case "lib3":
+                    library3.encode(args.filename, args.message)
                 case _:
                     if args.mode in choices:
-                        dct.encode(args.filename, args.message, args.mode)
+                        library2.encode(args.filename, args.message, args.mode)
         elif args.command == "decode":
             print("Decoding watermark...")
             match args.mode:
-                case "lsb-text":
-                    lsb.decode_text(args.filename)
+                case "lsb":
+                    watermark = library1.decode_text(args.filename)
+                    print(watermark)
                 case "lsb-image":
-                    lsb.decode_image(args.filename)
-                case "alpha":
-                    alpha.decode(args.filename)
+                    watermark = library1.decode_image(args.filename)
+                    print(watermark)
+                case "lib3":
+                    watermark = library3.decode(args.filename)
+                    print(watermark)
                 case _:
                     if args.mode in choices:
-                        dct.decode(args.filename, args.mode)
-        elif args.command == "test":
-            print("Running tests...")
-            tests.test()
+                        watermark = library2.decode(args.filename, args.mode)
+                        print(watermark)
     
     return 0
 
