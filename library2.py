@@ -6,7 +6,7 @@ from PIL import Image
 #            https://github.com/ShieldMnt/invisible-watermark                 #
 ###############################################################################
 
-METHODS = ['dwtDct', 'dwtDctSvd']
+METHODS = ['dwtDct', 'dwtDctSvd', 'rivaGan']
 
 
 def encode(filename: str, message: str, method: str) -> Image:
@@ -14,6 +14,7 @@ def encode(filename: str, message: str, method: str) -> Image:
 
     encoder = WatermarkEncoder()
     encoder.set_watermark('bytes', message[:4].encode('utf-8'))
+    encoder.loadModel()
     bgr_encoded = encoder.encode(bgr, method)
 
     outfile = filename.split(".")
@@ -21,18 +22,19 @@ def encode(filename: str, message: str, method: str) -> Image:
     cv2.imwrite(outfile, bgr_encoded)
     print(f"Watermarked file: {outfile}")
 
-    return Image.fromarray(bgr_encoded)
+    return Image.open(outfile)
 
 
 def decode(filename: str, method: str) -> str:
     bgr = cv2.imread(filename)
 
     decoder = WatermarkDecoder('bytes', 32)
+    decoder.loadModel()
     watermark = decoder.decode(bgr, method)
 
     try:
-        watermark = watermark.decode('utf-8')
+        watermark_decoded = watermark.decode('utf-8')
     except UnicodeDecodeError as e:
-        pass
+        return watermark
 
-    return watermark
+    return watermark_decoded

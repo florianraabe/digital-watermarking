@@ -17,7 +17,7 @@ def encode_text(filename: str, message: str) -> Image:
 
     for x in range(0, image.width):
         for y in range(0, image.height):
-            r, g, b = pixels[x, y]
+            r, g, b, *a = pixels[x, y]
 
             index = (x * image.height + y) % len(bits)
 
@@ -25,7 +25,7 @@ def encode_text(filename: str, message: str) -> Image:
             # g = int(f'{g:08b}'[:7] + f'{bits}'[index: index + 1], 2)
             # b = int(f'{b:08b}'[:7] + f'{bits}'[index: index + 1], 2)
 
-            watermarked_pixels[x, y] = (r, g, b)
+            watermarked_pixels[x, y] = (r, g, b, *a)
 
     outfile = "".join(outfile[:-1]) + "-watermarked." + outfile[-1]
     watermarked_image.save(outfile)

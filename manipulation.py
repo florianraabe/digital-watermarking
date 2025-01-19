@@ -32,7 +32,7 @@ def mask(image: Image) -> Image:
 
 
 def crop(image: Image) -> Image:
-    return image.crop((64, 64, 256, 256))
+    return image.crop((0, 0, 512, 512))
 
 
 def resize(image: Image) -> Image:
